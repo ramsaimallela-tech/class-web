@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE Section C - Futuristic Portal</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10/dist/framer-motion.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-blue: #0080ff;
+            --neon-purple: #8000ff;
+            --dark-bg: #0a0e1a;
+            --card-bg: #1a1f35;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.05s ease;
+        }
+
+        /* Circuit Animation Background */
+        .circuit-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            background-image:
+                linear-gradient(90deg, var(--neon-cyan) 1px, transparent 1px),
+                linear-gradient(0deg, var(--neon-cyan) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: circuit-flow 20s linear infinite;
+        }
+
+        @keyframes circuit-flow {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 26, 0.8);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon-cyan);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .nav-links a:hover {
+            color: var(--neon-cyan);
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 80px;
+            perspective: 1000px;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-tagline {
+            font-size: 1rem;
+            color: var(--neon-cyan);
+            font-style: italic;
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(26, 31, 53, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            border-color: var(--neon-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Bento Grid Section */
+        .bento-section {
+            padding: 6rem 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #fff, var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .bento-card {
+            background: rgba(26, 31, 53, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bento-card:hover::before {
+            opacity: 1;
+        }
+
+        .bento-card:hover {
+            border-color: var(--neon-cyan);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2);
+        }
+
+        .bento-wide {
+            grid-column: span 2;
+        }
+
+        .bento-tall {
+            grid-row: span 2;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--neon-cyan);
+        }
+
+        .card-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Birthday Carousel */
+        .birthday-carousel {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .birthday-card {
+            min-width: 150px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .birthday-card:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* Students Section */
+        .students-section {
+            padding: 6rem 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .student-card {
+            background: rgba(26, 31, 53, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3);
+            transform: translateY(-10px);
+        }
+
+        .student-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .student-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-roll {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Timetable */
+        .timetable-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(26, 31, 53, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .timetable th,
+        .timetable td {
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .timetable th {
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        .timetable td {
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .timetable tr:hover td {
+            background: rgba(0, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Magnetic Button */
+        .magnetic-btn {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            cursor: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .magnetic-btn:hover {
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        /* Login Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: rgba(26, 31, 53, 0.9);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+        }
+
+        .login-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--neon-cyan);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--neon-cyan);
+        }
+
+        .error-msg {
+            color: #ff4d4d;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .nav-login-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .nav-login-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-login-btn {
+                display: none;
+                /* simple hide for mobile for now or can add to mobile menu if exists */
+            }
+
+            .navbar {
+                padding: 1rem 1.5rem;
+            }
+
+            .bento-section,
+            .students-section {
+                padding: 3rem 1.5rem;
+            }
+
+            .bento-wide {
+                grid-column: span 1;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            body {
+                cursor: auto;
+            }
+
+            .custom-cursor,
+            .cursor-dot {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Root element for React -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { motion, AnimatePresence } = window.Motion;
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+            const [isLoginOpen, setIsLoginOpen] = useState(false);
+            const [loginType, setLoginType] = useState('student'); // 'student' or 'faculty'
+            const [credentials, setCredentials] = useState({ username: '', password: '', rollNo: '' });
+            const [error, setError] = useState('');
+
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    setCursorPosition({ x: e.clientX, y: e.clientY });
+                };
+
+                window.addEventListener('mousemove', handleMouseMove);
+                return () => window.removeEventListener('mousemove', handleMouseMove);
+            }, []);
+
+            const sampleStudents = [
+                { name: 'KOSANA HARSHA VARDHAN REDDY', roll: '25KD1A04C5', initials: 'KR' },
+                { name: 'KOVVURI SOBHARANI', roll: '25KD1A04C6', initials: 'KS' },
+                { name: 'KRISHNACHANDRA SINGH', roll: '25KD1A04C7', initials: 'KS' },
+                { name: 'KUNA MANJU', roll: '25KD1A04C8', initials: 'KM' },
+                { name: 'KUNIBILLI SRI MORAJI ANAND', roll: '25KD1A04C9', initials: 'KA' },
+                { name: 'KUSUMANCHI GOVARDHAN SAI', roll: '25KD1A04D0', initials: 'KS' },
+                { name: 'LAGUDU BHANU SRI', roll: '25KD1A04D1', initials: 'LS' },
+                { name: 'LAKKOJU MANASA', roll: '25KD1A04D2', initials: 'LM' },
+                { name: 'LANDA SANDHYA', roll: '25KD1A04D3', initials: 'LS' },
+                { name: 'LANDA YUVA SWAMI NAIDU', roll: '25KD1A04D4', initials: 'LN' },
+                { name: 'LEKKALA ABHIRAM', roll: '25KD1A04D5', initials: 'LA' },
+                { name: 'LENKA BHNU PRIYA', roll: '25KD1A04D6', initials: 'LP' },
+                { name: 'LENKA PRIYA DARSHINI', roll: '25KD1A04D7', initials: 'LD' },
+                { name: 'LENKA YESASWINI', roll: '25KD1A04D8', initials: 'LY' },
+                { name: 'LOTHETI PRASANTH KUMAR', roll: '25KD1A04D9', initials: 'LK' },
+                { name: 'MADAKA ABHIRAM', roll: '25KD1A04E0', initials: 'MA' },
+                { name: 'MADDILA HIMESH', roll: '25KD1A04E1', initials: 'MH' },
+                { name: 'MADDILA PAVAN SRI HARI', roll: '25KD1A04E2', initials: 'MH' },
+                { name: 'MADDULA DEEKSHITHA SRINITHI', roll: '25KD1A04E3', initials: 'MS' },
+                { name: 'MAHANTHI HEMANTH', roll: '25KD1A04E4', initials: 'MH' },
+                { name: 'MAJJI HARSHINI', roll: '25KD1A04E5', initials: 'MH' },
+                { name: 'MALLELA RAM SAI TEJA', roll: '25KD1A04E6', initials: 'MT' },
+                { name: 'MAMIDI SANTHOSHKUMAR', roll: '25KD1A04E7', initials: 'MS' },
+                { name: 'MAMMULA AJAY KUMAR', roll: '25KD1A04E8', initials: 'MK' },
+                { name: 'MANTHINA ALEKHYA', roll: '25KD1A04E9', initials: 'MA' },
+                { name: 'MARADA CHANDRA MOULI', roll: '25KD1A04F0', initials: 'MM' },
+                { name: 'MEESALA KALYANI', roll: '25KD1A04F1', initials: 'MK' },
+                { name: 'MIRTHIPATI SOWJANYA', roll: '25KD1A04F2', initials: 'MS' },
+                { name: 'MURIPINDI UDAYA SRI', roll: '25KD1A04F3', initials: 'MS' },
+                { name: 'NADAGALA BHANU SATYA VENKATESH', roll: '25KD1A04F4', initials: 'NV' },
+                { name: 'NAKKINA YASASWANI', roll: '25KD1A04F5', initials: 'NY' },
+                { name: 'NALAM LAKSHMI GAYATRI', roll: '25KD1A04F6', initials: 'NG' },
+                { name: 'NANGIREDDI MOHAN RAO', roll: '25KD1A04F7', initials: 'NR' },
+                { name: 'NARAYANAPURAM BHAVANI', roll: '25KD1A04F8', initials: 'NB' },
+                { name: 'NEKKALA SRI VARDHAN', roll: '25KD1A04F9', initials: 'NV' },
+                { name: 'NETETI PAVAN', roll: '25KD1A04G0', initials: 'NP' },
+                { name: 'PADALA BHARGAVI', roll: '25KD1A04G1', initials: 'PB' },
+                { name: 'PADALA KUMARASWAMY', roll: '25KD1A04G2', initials: 'PK' },
+                { name: 'PALLANTLA CHITTI RAJU', roll: '25KD1A04G3', initials: 'PR' },
+                { name: 'PAPPALA SRAVANTHI', roll: '25KD1A04G4', initials: 'PS' },
+                { name: 'PARASANA DHANUSH', roll: '25KD1A04G5', initials: 'PD' },
+                { name: 'PARIMELLA VIGNAN SAI', roll: '25KD1A04G6', initials: 'PS' },
+                { name: 'PARRI UDAY KIRAN', roll: '25KD1A04G7', initials: 'PK' },
+                { name: 'PATHI GREESHMA SREE', roll: '25KD1A04G8', initials: 'PS' },
+                { name: 'PATHIVADA BHARATH', roll: '25KD1A04G9', initials: 'PB' },
+                { name: 'PATHURI SAI SHIVA KARTHIKEYA', roll: '25KD1A04H0', initials: 'PK' },
+                { name: 'PATNAIKUNI SAI LIKHITHA', roll: '25KD1A04H1', initials: 'PL' },
+                { name: 'PEDDINTI HEMANTH KUMAR', roll: '25KD1A04H2', initials: 'PK' },
+                { name: 'PEETHALA REVANTH KUMAR YADAV', roll: '25KD1A04H3', initials: 'PY' },
+                { name: 'PENKI ANILKUMAR', roll: '25KD1A04H4', initials: 'PA' },
+                { name: 'PENUGONDA LAKSHMANA RAO', roll: '25KD1A04H5', initials: 'PR' },
+                { name: 'PERI SRI SAI SINDHUJA', roll: '25KD1A04H6', initials: 'PS' },
+                { name: 'PILLA CHANDU', roll: '25KD1A04H7', initials: 'PC' },
+                { name: 'PILLA HINDU PRIYA', roll: '25KD1A04H8', initials: 'PP' },
+                { name: 'PINNINTI BHUVANA KRUTHI', roll: '25KD1A04H9', initials: 'PK' },
+                { name: 'PODAGATLAPALLI SAI LAKSHMI DURGA YASASWINI', roll: '25KD1A04I0', initials: 'PY' },
+                { name: 'PODIPIREDDI RESHMA', roll: '25KD1A04I1', initials: 'PR' },
+                { name: 'POLIPARTHI ANUSHA', roll: '25KD1A04I2', initials: 'PA' },
+                { name: 'POLLAITAMADA JENNISHA', roll: '25KD1A04I3', initials: 'PJ' },
+                { name: 'POTIPIREDDI JASWANTH', roll: '25KD1A04I4', initials: 'PJ' },
+                { name: 'POTNURU SIRI VARSHINI', roll: '25KD1A04I5', initials: 'PV' },
+            ];
+
+            // --- Data Seeding (Simulating a Database) ---
+            useEffect(() => {
+                // Seed Students if not exists
+                if (!localStorage.getItem('ece_c_students')) {
+                    localStorage.setItem('ece_c_students', JSON.stringify(sampleStudents.map(s => ({ ...s, isPresent: true }))));
+                }
+
+                // Seed Faculty if not exists
+                if (!localStorage.getItem('ece_c_faculty')) {
+                    const initialFaculty = [
+                        { id: 'FAC001', username: 'jsmith', password: 'password123', name: 'Dr. John Smith', dept: 'ECE', isPresent: true, attendance: 92, lessonsTaken: 45 },
+                        { id: 'FAC002', username: 'sconnor', password: 'password123', name: 'Prof. Sarah Connor', dept: 'ECE', isPresent: true, attendance: 88, lessonsTaken: 40 },
+                        // Default generic faculty for testing
+                        { id: 'FAC000', username: 'faculty', password: 'ece-c', name: 'Faculty Member', dept: 'ECE', isPresent: true, attendance: 0, lessonsTaken: 0 }
+                    ];
+                    localStorage.setItem('ece_c_faculty', JSON.stringify(initialFaculty));
+                }
+            }, []);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                setError('');
+
+                if (loginType === 'admin') {
+                    if (credentials.username === 'admin' && credentials.password === 'admin123') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        setError('Invalid Admin Credentials');
+                    }
+                } else if (loginType === 'faculty') {
+                    const facultyList = JSON.parse(localStorage.getItem('ece_c_faculty') || '[]');
+                    const fac = facultyList.find(f => f.username === credentials.username && f.password === credentials.password);
+
+                    if (fac) {
+                        // pass ID to faculty dashboard
+                        window.location.href = `faculty.html?id=${fac.id}`;
+                    } else {
+                        setError('Invalid Faculty Credentials');
+                    }
+                } else {
+                    // Check against seeded data or the sample list (keeping sampleList for fallback/init)
+                    // In a real app we'd query the DB/LocalStorage
+                    const storedStudents = JSON.parse(localStorage.getItem('ece_c_students') || '[]');
+                    const student = storedStudents.find(s => s.roll === credentials.rollNo.toUpperCase()) ||
+                        sampleStudents.find(s => s.roll === credentials.rollNo.toUpperCase());
+
+                    if (student) {
+                        window.location.href = `student.html?roll=${student.roll}&name=${encodeURIComponent(student.name)}`;
+                    } else {
+                        setError('Invalid Roll Number');
+                    }
+                }
+            };
+
+            return (
+                <>
+                    {/* Custom Cursor */}
+                    <div
+                        className="custom-cursor"
+                        style={{
+                            left: `${cursorPosition.x}px`,
+                            top: `${cursorPosition.y}px`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
+                    />
+                    <div
+                        className="cursor-dot"
+                        style={{
+                            left: `${cursorPosition.x}px`,
+                            top: `${cursorPosition.y}px`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
+                    />
+
+                    {/* Circuit Background */}
+                    <div className="circuit-bg" />
+
+                    {/* Navbar */}
+                    <nav className="navbar">
+                        <div className="logo">ECE-C Portal</div>
+                        <ul className="nav-links">
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#updates">Updates</a></li>
+                            <li><a href="#students">Students</a></li>
+                            <li><a href="#timetable">Timetable</a></li>
+                        </ul>
+                        <button className="nav-login-btn" onClick={() => setIsLoginOpen(true)}>Login</button>
+                    </nav>
+
+                    <AnimatePresence>
+                        {isLoginOpen && (
+                            <motion.div
+                                className="modal-overlay"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsLoginOpen(false)}
+                            >
+                                <motion.div
+                                    className="login-card"
+                                    initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                                    exit={{ scale: 0.9, opacity: 0, y: 50 }}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <button className="close-modal" onClick={() => setIsLoginOpen(false)}>×</button>
+                                    <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--neon-cyan)' }}>Portal Access</h2>
+
+                                    <div className="login-tabs">
+                                        <button
+                                            className={`tab-btn ${loginType === 'student' ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setLoginType('student');
+                                                setError('');
+                                                setCredentials({ ...credentials, rollNo: '' });
+                                            }}
+                                        >
+                                            Student
+                                        </button>
+                                        <button
+                                            className={`tab-btn ${loginType === 'faculty' ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setLoginType('faculty');
+                                                setError('');
+                                                setCredentials({ ...credentials, username: '', password: '' });
+                                            }}
+                                        >
+                                            Faculty
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleLogin}>
+                                        {loginType === 'student' ? (
+                                            <div className="input-group">
+                                                <label>Roll Number</label>
+                                                <input
+                                                    type="text"
+                                                    className="login-input"
+                                                    placeholder="Enter your Roll Number"
+                                                    value={credentials.rollNo}
+                                                    onChange={(e) => setCredentials({ ...credentials, rollNo: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="input-group">
+                                                    <label>Username</label>
+                                                    <input
+                                                        type="text"
+                                                        className="login-input"
+                                                        placeholder="Enter Username"
+                                                        value={credentials.username}
+                                                        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="input-group">
+                                                    <label>Password</label>
+                                                    <input
+                                                        type="password"
+                                                        className="login-input"
+                                                        placeholder="Enter Password"
+                                                        value={credentials.password}
+                                                        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                                                        required
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                        {error && <div className="error-msg">{error}</div>}
+                                        <button type="submit" className="login-btn">
+                                            {loginType === 'student' ? 'Access Student Portal' : 'Access Admin Dashboard'}
+                                        </button>
+                                    </form>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Hero Section */}
+                    <section className="hero" id="home">
+                        <div className="hero-content">
+                            <motion.div
+                                initial={{ opacity: 0, y: -50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                            >
+                                <p className="hero-subtitle">Welcome to</p>
+                                <h1>ECE Section C</h1>
+                                <p className="hero-tagline">"Engineering Tomorrow, Today"</p>
+                            </motion.div>
+
+                            <motion.div
+                                className="stats-grid"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.3 }}
+                            >
+                                <div className="stat-card">
+                                    <div className="stat-number">61</div>
+                                    <div className="stat-label">Bright Minds</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">24</div>
+                                    <div className="stat-label">Study Resources</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">120+</div>
+                                    <div className="stat-label">Memories</div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </section>
+
+                    {/* Bento Grid Section */}
+                    <section className="bento-section" id="updates">
+                        <motion.h2
+                            className="section-title"
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            Class Updates
+                        </motion.h2>
+
+                        <div className="bento-grid">
+                            {/* Upcoming Birthdays */}
+                            <motion.div
+                                className="bento-card bento-wide"
+                                initial={{ opacity: 0, x: -100 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.5 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="card-title">🎂 Upcoming Birthdays</h3>
+                                <div className="birthday-carousel">
+                                    {['Alex - Jan 15', 'Sarah - Jan 20', 'Mike - Jan 25'].map((birthday, i) => (
+                                        <motion.div
+                                            key={i}
+                                            className="birthday-card"
+                                            whileHover={{
+                                                rotateY: 10,
+                                                scale: 1.05,
+                                                transition: { duration: 0.3 }
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+                                            <div style={{ color: 'var(--neon-cyan)' }}>{birthday}</div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            {/* Announcements */}
+                            <motion.div
+                                className="bento-card bento-tall"
+                                initial={{ opacity: 0, y: 100 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="card-title">📢 Announcements</h3>
+                                <div className="card-content">
+                                    <p style={{ marginBottom: '1rem' }}>• Mid-term exams start next week</p>
+                                    <p style={{ marginBottom: '1rem' }}>• Project submission deadline: Jan 30</p>
+                                    <p>• Lab session rescheduled to Friday</p>
+                                </div>
+                            </motion.div>
+
+                            {/* Assignments */}
+                            <motion.div
+                                className="bento-card"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.3 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="card-title">📝 Active</h3>
+                                <div className="card-content">
+                                    <div style={{ fontSize: '3rem', color: 'var(--neon-cyan)', fontWeight: 'bold' }}>5</div>
+                                    <p>Assignments Pending</p>
+                                </div>
+                            </motion.div>
+
+                            {/* Resources */}
+                            <motion.div
+                                className="bento-card"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.4 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="card-title">📚 Resources</h3>
+                                <div className="card-content">
+                                    <div style={{ fontSize: '3rem', color: 'var(--neon-cyan)', fontWeight: 'bold' }}>24</div>
+                                    <p>Study Materials</p>
+                                </div>
+                            </motion.div>
+
+                            {/* Gallery */}
+                            <motion.div
+                                className="bento-card"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="card-title">📸 Gallery</h3>
+                                <div className="card-content">
+                                    <div style={{ fontSize: '3rem', color: 'var(--neon-cyan)', fontWeight: 'bold' }}>120+</div>
+                                    <p>Class Photos</p>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </section>
+
+                    {/* Students Section */}
+                    <section className="students-section" id="students">
+                        <motion.h2
+                            className="section-title"
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            Our Students
+                        </motion.h2>
+
+                        <div className="students-grid">
+                            {sampleStudents.map((student, index) => (
+                                <motion.div
+                                    key={student.roll}
+                                    className="student-card"
+                                    initial={{ opacity: 0, y: 50 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    viewport={{ once: true }}
+                                    whileHover={{
+                                        rotateX: 5,
+                                        rotateY: 5,
+                                        transition: { duration: 0.3 }
+                                    }}
+                                >
+                                    <div className="student-avatar">{student.initials}</div>
+                                    <div className="student-name">{student.name}</div>
+                                    <div className="student-roll">{student.roll}</div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <motion.div
+                            style={{ textAlign: 'center', marginTop: '3rem' }}
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            <motion.button
+                                className="magnetic-btn"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                View All Students
+                            </motion.button>
+                        </motion.div>
+                    </section>
+
+                    {/* Timetable Section */}
+                    <section className="bento-section" id="timetable">
+                        <motion.h2
+                            className="section-title"
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true }}
+                        >
+                            Weekly Timetable
+                        </motion.h2>
+
+                        <div className="timetable-container">
+                            <table className="timetable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Monday</th>
+                                        <th>Tuesday</th>
+                                        <th>Wednesday</th>
+                                        <th>Thursday</th>
+                                        <th>Friday</th>
+                                        <th>Saturday</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>9:10 - 10:10</td>
+                                        <td>DEVC</td>
+                                        <td>EWS</td>
+                                        <td>NP</td>
+                                        <td>EP</td>
+                                        <td>NA LAB</td>
+                                        <td>BCME</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10:10 - 11:10</td>
+                                        <td>EPLAB</td>
+                                        <td>EWS </td>
+                                        <td>ITWS</td>
+                                        <td>NA LAB</td>
+                                        <td>CE </td>
+                                    </tr>
+                                    <tr>
+                                        <td>11:10 - 12:10</td>
+                                        <td>EP LAB</td>
+                                        <td>EWS</td>
+                                        <td>ITWS</td>
+                                        <td>HWYS</td>
+                                        <td>NA LAB</td>
+                                        <td>DEVC</td>
+                                    </tr>
+                                    <tr>
+                                        <td>12:10 - 1:00</td>
+                                        <td>LUNCH</td>
+                                        <td>LUNCH</td>
+                                        <td>LUNCH</td>
+                                        <td>LUNCH</td>
+                                        <td>LUNCH</td>
+                                        <td>LUNCH</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1:00 - 2:00</td>
+                                        <td>BCME</td>
+                                        <td>CE</td>
+                                        <td>EP</td>
+                                        <td>BCME</td>
+                                        <td>DEVC</td>
+                                        <td>NA </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2:00 -3:00</td>
+                                        <td>DEVC</td>
+                                        <td>LIB/COUN</td>
+                                        <td>DEVC</td>
+                                        <td>CE LAB</td>
+                                        <td>NA </td>
+                                        <td>DS LAB</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3:00-4:00</td>
+                                        <td>EP</td>
+                                        <td>Devc</td>
+                                        <td>BCME</td>
+                                        <td>CE LAB</td>
+                                        <td>EP </td>
+                                        <td>DS LAB</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div >
+                    </section >
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>

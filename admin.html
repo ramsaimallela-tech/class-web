@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - ECE Dept</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10/dist/framer-motion.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-blue: #0080ff;
+            --neon-purple: #8000ff;
+            --neon-red: #ff0055;
+            --neon-green: #00ff88;
+            --dark-bg: #0a0e1a;
+            --card-bg: #1a1f35;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 26, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: var(--neon-cyan);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        /* Container */
+        .dashboard-container {
+            padding: 8rem 3rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+
+        .date-display {
+            color: var(--neon-cyan);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        /* Lists and Cards */
+        .admin-section {
+            background: rgba(26, 31, 53, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .faculty-list,
+        .holiday-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            border-color: rgba(0, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Controls */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: var(--neon-red);
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-field {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            flex-grow: 1;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #333;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--neon-green);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('faculty');
+            const [today] = useState(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+
+            const [facultyList, setFacultyList] = useState([]);
+            const [holidays, setHolidays] = useState([]);
+            const [newHolidayDate, setNewHolidayDate] = useState('');
+            const [newHolidayName, setNewHolidayName] = useState('');
+
+            useEffect(() => {
+                // Load Faculty from Local Storage (Seeded in index.html)
+                // If not seeded yet, fall back to empty or wait for index load
+                const savedFaculty = localStorage.getItem('ece_c_faculty');
+                if (savedFaculty) {
+                    setFacultyList(JSON.parse(savedFaculty));
+                }
+
+                // Load Holidays
+                const savedHolidays = localStorage.getItem('college_holidays');
+                if (savedHolidays) {
+                    setHolidays(JSON.parse(savedHolidays));
+                }
+            }, []);
+
+            // --- Faculty Handlers ---
+            const toggleFacultyAttendance = (id) => {
+                const updated = facultyList.map(f => f.id === id ? { ...f, isPresent: !f.isPresent } : f);
+                setFacultyList(updated);
+            };
+
+            const saveFacultyAttendance = () => {
+                // Save back to the master faculty list
+                localStorage.setItem('ece_c_faculty', JSON.stringify(facultyList));
+
+                // Also save a daily snapshot if needed for history
+                localStorage.setItem('faculty_attendance_' + new Date().toDateString(), JSON.stringify(facultyList));
+
+                alert('Faculty Attendance Saved & Profiles Updated!');
+            };
+
+            // --- Holiday Handlers ---
+            const addHoliday = () => {
+                if (!newHolidayDate || !newHolidayName) return alert("Please fill both fields");
+
+                const newHoliday = { date: newHolidayDate, name: newHolidayName };
+                const updatedHolidays = [...holidays, newHoliday].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                setHolidays(updatedHolidays);
+                localStorage.setItem('college_holidays', JSON.stringify(updatedHolidays));
+
+                setNewHolidayDate('');
+                setNewHolidayName('');
+            };
+
+            const deleteHoliday = (dateToDelete) => {
+                const updated = holidays.filter(h => h.date !== dateToDelete);
+                setHolidays(updated);
+                localStorage.setItem('college_holidays', JSON.stringify(updated));
+            };
+
+            const handleLogout = () => {
+                window.location.href = 'index.html';
+            };
+
+            return (
+                <>
+                    <nav className="navbar">
+                        <div className="logo">Admin Portal</div>
+                        <div className="nav-links">
+                            <button
+                                className={`nav-tab ${activeTab === 'faculty' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('faculty')}
+                            >
+                                Faculty Management
+                            </button>
+                            <button
+                                className={`nav-tab ${activeTab === 'calendar' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('calendar')}
+                            >
+                                Calendar Settings
+                            </button>
+                        </div>
+                        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                    </nav>
+
+                    <div className="dashboard-container">
+                        <header className="dashboard-header">
+                            <div className="date-display">{today}</div>
+                            <h1 className="welcome-text">Administration</h1>
+                        </header>
+
+                        {activeTab === 'faculty' && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                <section className="admin-section">
+                                    <div className="section-header">
+                                        <h2>Faculty Attendance</h2>
+                                        <button className="btn-primary" onClick={saveFacultyAttendance}>Save Changes</button>
+                                    </div>
+                                    <div className="faculty-list">
+                                        {facultyList.map(f => (
+                                            <div key={f.id} className="list-item">
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{f.name}</div>
+                                                    <div style={{ color: 'var(--text-secondary)' }}>{f.dept} Department</div>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    <span style={{
+                                                        color: f.isPresent ? 'var(--neon-green)' : 'var(--neon-red)',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {f.isPresent ? 'Present' : 'Absent'}
+                                                    </span>
+                                                    <div
+                                                        className={`toggle-switch ${f.isPresent ? 'active' : ''}`}
+                                                        onClick={() => toggleFacultyAttendance(f.id)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'calendar' && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                <section className="admin-section">
+                                    <div className="section-header">
+                                        <h2>Manage Holidays / Non-Working Days</h2>
+                                    </div>
+
+                                    <div className="input-group">
+                                        <input
+                                            type="date"
+                                            className="input-field"
+                                            value={newHolidayDate}
+                                            onChange={(e) => setNewHolidayDate(e.target.value)}
+                                        />
+                                        <input
+                                            type="text"
+                                            className="input-field"
+                                            placeholder="Holiday Name (e.g. Boxing Day)"
+                                            value={newHolidayName}
+                                            onChange={(e) => setNewHolidayName(e.target.value)}
+                                        />
+                                        <button className="btn-primary" onClick={addHoliday}>Add Holiday</button>
+                                    </div>
+
+                                    <div className="holiday-list">
+                                        {holidays.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No holidays added yet.</p>}
+                                        {holidays.map((h, index) => (
+                                            <div key={index} className="list-item">
+                                                <div>
+                                                    <div style={{ color: 'var(--neon-cyan)', fontWeight: 'bold' }}>{h.date}</div>
+                                                    <div>{h.name}</div>
+                                                </div>
+                                                <button className="btn-danger" onClick={() => deleteHoliday(h.date)}>Remove</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </motion.div>
+                        )}
+                    </div>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Portal - ECE Section C</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10/dist/framer-motion.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-blue: #0080ff;
+            --neon-purple: #8000ff;
+            --neon-red: #ff0055;
+            --neon-green: #00ff88;
+            --dark-bg: #0a0e1a;
+            --card-bg: #1a1f35;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 26, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: var(--neon-cyan);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        /* Container */
+        .dashboard-container {
+            padding: 8rem 3rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+
+        .date-display {
+            color: var(--neon-cyan);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        /* Student List Styles (Reused) */
+        .search-bar {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .student-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 100px;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            margin-bottom: 1rem;
+        }
+
+        .student-row:hover {
+            background: rgba(0, 255, 255, 0.05);
+            border-color: rgba(0, 255, 255, 0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 0.9rem;
+        }
+
+        .roll-no {
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #333;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--neon-green);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        /* Timetable Styles */
+        .timetable-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .timetable-header,
+        .timetable-cell {
+            padding: 1rem;
+            background: rgba(26, 31, 53, 0.9);
+            text-align: center;
+        }
+
+        .timetable-header {
+            color: var(--neon-cyan);
+            font-weight: 700;
+            background: rgba(10, 14, 26, 0.95);
+        }
+
+        .timetable-cell {
+            font-size: 0.9rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .class-code {
+            color: var(--neon-green);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .room-no {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Cards for Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(26, 31, 53, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .dashboard-container {
+                padding: 8rem 1.5rem 1.5rem;
+            }
+
+            .student-row {
+                grid-template-columns: 50px 1fr 80px;
+                gap: 0.5rem;
+            }
+
+            .roll-no {
+                display: none;
+            }
+
+            .timetable-grid {
+                display: block;
+            }
+
+            .timetable-header {
+                display: none;
+            }
+
+            .timetable-cell {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 1rem;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [today] = useState(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+
+            // Student Data loaded from localStorage
+
+            const [students, setStudents] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [facultyDetails, setFacultyDetails] = useState({
+                name: 'Dr. Faculty Member',
+                id: 'FAC001',
+                attendance: 92, // Mock percentage
+                lessonsTaken: 45
+            });
+
+            useEffect(() => {
+                // 1. Get Faculty ID from URL
+                const params = new URLSearchParams(window.location.search);
+                const facId = params.get('id');
+
+                // 2. Load Faculty Details
+                const allFaculty = JSON.parse(localStorage.getItem('ece_c_faculty') || '[]');
+                const currentFaculty = allFaculty.find(f => f.id === facId);
+
+                if (currentFaculty) {
+                    setFacultyDetails({
+                        name: currentFaculty.name,
+                        id: currentFaculty.id,
+                        attendance: currentFaculty.attendance || 0,
+                        lessonsTaken: currentFaculty.lessonsTaken || 0
+                    });
+                }
+
+                // 3. Load Students (Centralized)
+                // We check for a daily-specific record first, else fall back to the master list
+                const dailyKey = 'ece_c_attendance_' + new Date().toDateString();
+                const todayAttendance = localStorage.getItem(dailyKey);
+
+                if (todayAttendance) {
+                    setStudents(JSON.parse(todayAttendance));
+                } else {
+                    // If no attendance marked for today yet, load the master student list (defaulting to present)
+                    const masterList = JSON.parse(localStorage.getItem('ece_c_students') || '[]');
+                    // Ensure initials are present if seeded data didn't have them (optional safety)
+                    setStudents(masterList.map(s => ({ ...s, isPresent: true, initials: s.initials || s.name.split(' ').map(n => n[0]).join('') })));
+                }
+
+                // Check for Admin-set holidays
+                const holidays = JSON.parse(localStorage.getItem('college_holidays') || '[]');
+            }, []);
+
+            const toggleAttendance = (roll) => {
+                const updatedStudents = students.map(s =>
+                    s.roll === roll ? { ...s, isPresent: !s.isPresent } : s
+                );
+                setStudents(updatedStudents);
+            };
+
+            const saveAttendance = () => {
+                // Save to today's specific key
+                localStorage.setItem('ece_c_attendance_' + new Date().toDateString(), JSON.stringify(students));
+
+                // OPTIONAL: Update master calculations here if we were doing real-time analytics
+                alert('Student Attendance saved successfully!');
+            };
+
+            const handleLogout = () => {
+                window.location.href = 'index.html';
+            };
+
+            const filteredStudents = students.filter(student =>
+                student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                student.roll.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return (
+                <>
+                    <nav className="navbar">
+                        <div className="logo">Faculty Portal</div>
+                        <div className="nav-links">
+                            <button
+                                className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('dashboard')}
+                            >
+                                My Dashboard
+                            </button>
+                            <button
+                                className={`nav-tab ${activeTab === 'attendance' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('attendance')}
+                            >
+                                Student Attendance
+                            </button>
+                        </div>
+                        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                    </nav>
+
+                    <div className="dashboard-container">
+                        <header className="dashboard-header">
+                            <div className="date-display">{today}</div>
+                            <h1 className="welcome-text">Results & Analytics</h1>
+                            <p style={{ color: 'var(--text-secondary)' }}>Welcome, {facultyDetails.name}</p>
+                        </header>
+
+                        {activeTab === 'dashboard' && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <div className="stats-grid">
+                                    <div className="stat-card">
+                                        <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>My Attendance</h3>
+                                        <div className="stat-value" style={{ color: 'var(--neon-green)' }}>{facultyDetails.attendance}%</div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Present Days</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Classes Taken</h3>
+                                        <div className="stat-value" style={{ color: 'var(--neon-cyan)' }}>{facultyDetails.lessonsTaken}</div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>This Semester</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Active Students</h3>
+                                        <div className="stat-value" style={{ color: 'var(--neon-purple)' }}>{students.length}</div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>ECE Section C</div>
+                                    </div>
+                                </div>
+
+                                <h2 style={{ color: 'var(--neon-cyan)', marginBottom: '1.5rem' }}>Weekly Timetable</h2>
+                                <div className="timetable-grid">
+                                    <div className="timetable-header">Time</div>
+                                    <div className="timetable-header">Mon</div>
+                                    <div className="timetable-header">Tue</div>
+                                    <div className="timetable-header">Wed</div>
+                                    <div className="timetable-header">Thu</div>
+                                    <div className="timetable-header">Fri</div>
+
+                                    {/* 9:00 - 10:00 */}
+                                    <div className="timetable-cell">9:00 - 10:00</div>
+                                    <div className="timetable-cell">
+                                        <div className="class-code">ECE-C</div>
+                                        <div className="room-no">Room 304</div>
+                                    </div>
+                                    <div className="timetable-cell">--</div>
+                                    <div className="timetable-cell">
+                                        <div className="class-code">ECE-A</div>
+                                        <div className="room-no">Lab 2</div>
+                                    </div>
+                                    <div className="timetable-cell">--</div>
+                                    <div className="timetable-cell">
+                                        <div className="class-code">ECE-C</div>
+                                        <div className="room-no">Room 304</div>
+                                    </div>
+
+                                    {/* 10:00 - 11:00 */}
+                                    <div className="timetable-cell">10:00 - 11:00</div>
+                                    <div className="timetable-cell">--</div>
+                                    <div className="timetable-cell">
+                                        <div className="class-code">ECE-B</div>
+                                        <div className="room-no">Room 305</div>
+                                    </div>
+                                    <div className="timetable-cell">--</div>
+                                    <div className="timetable-cell">
+                                        <div className="class-code">ECE-C</div>
+                                        <div className="room-no">Lab 1</div>
+                                    </div>
+                                    <div className="timetable-cell">--</div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'attendance' && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h2 style={{ color: 'var(--neon-cyan)' }}>Mark Student Attendance</h2>
+                                    <button className="save-btn" onClick={saveAttendance}>Save Changes</button>
+                                </div>
+
+                                <input
+                                    type="text"
+                                    className="search-bar"
+                                    placeholder="Search student by name or roll number..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+
+                                <div className="student-list">
+                                    {filteredStudents.map((student) => (
+                                        <div key={student.roll} className="student-row">
+                                            <div className="avatar">{student.initials}</div>
+                                            <div className="student-info">
+                                                <div style={{ fontWeight: '600' }}>{student.name}</div>
+                                                <div className="roll-no">{student.roll}</div>
+                                            </div>
+                                            <div style={{
+                                                color: student.isPresent ? 'var(--neon-green)' : 'var(--neon-red)',
+                                                fontWeight: '600',
+                                                textAlign: 'right',
+                                                paddingRight: '1rem'
+                                            }}>
+                                                {student.isPresent ? 'Present' : 'Absent'}
+                                            </div>
+                                            <div
+                                                className={`toggle-switch ${student.isPresent ? 'active' : ''}`}
+                                                onClick={() => toggleAttendance(student.roll)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </div>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>

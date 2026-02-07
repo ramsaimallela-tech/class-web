@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - ECE Section C</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10/dist/framer-motion.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-blue: #0080ff;
+            --neon-purple: #8000ff;
+            --neon-green: #00ff80;
+            --neon-red: #ff0055;
+            --dark-bg: #0a0e1a;
+            --card-bg: #1a1f35;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Circuit Animation Background */
+        .circuit-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            background-image:
+                linear-gradient(90deg, var(--neon-cyan) 1px, transparent 1px),
+                linear-gradient(0deg, var(--neon-cyan) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: circuit-flow 20s linear infinite;
+        }
+
+        @keyframes circuit-flow {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(26, 31, 53, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        /* Attendance Styles */
+        .attendance-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(var(--neon-green) var(--percentage), rgba(255, 255, 255, 0.1) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 128, 0.2);
+        }
+
+        .attendance-circle::before {
+            content: '';
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            background: var(--dark-bg);
+            border-radius: 50%;
+        }
+
+        .attendance-value {
+            position: relative;
+            z-index: 10;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+        }
+
+        .attendance-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Assignment Styles */
+        .assignment-list {
+            list-style: none;
+        }
+
+        .assignment-item {
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--neon-purple);
+        }
+
+        .subject-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .assignment-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-submitted {
+            background: rgba(0, 255, 128, 0.15);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+
+        .status-pending {
+            background: rgba(255, 0, 85, 0.15);
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+        }
+
+        .status-graded {
+            background: rgba(0, 255, 255, 0.15);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+        }
+
+        .student-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .welcome-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .student-name-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion;
+
+        function App() {
+            const [student, setStudent] = useState(null);
+            const [attendanceData, setAttendanceData] = useState({
+                totalWorkingDays: 0,
+                presentDays: 0,
+                percentage: 0
+            });
+
+            // Fetch Holidays from Local Storage
+            const savedHolidays = localStorage.getItem('college_holidays');
+            const holidays = savedHolidays ? JSON.parse(savedHolidays).map(h => h.date) : [
+                '2026-02-14',
+                '2026-02-20'
+            ];
+
+            const assignments = [
+                { subject: 'DSP', title: 'Filter Design Lab', status: 'Submitted', date: '2026-02-05' },
+                { subject: 'VLSI', title: 'CMOS Layout', status: 'Pending', date: '2026-02-10' },
+                { subject: 'Embedded Systems', title: 'Microcontroller Interfacing', status: 'Graded', score: '18/20' },
+                { subject: 'Microwave', title: 'Waveguide Analysis', status: 'Pending', date: '2026-02-12' },
+            ];
+
+            useEffect(() => {
+                // Get roll number from URL
+                const params = new URLSearchParams(window.location.search);
+                const rollNo = params.get('roll');
+
+                // In a real app we would fetch student data from backend
+                // Here we'll just mock the student name lookup from the same list we used in index.html
+                // For simplicity, we'll just use the roll number if we can't find the name easily without importing the whole list
+                // Or we can pass the name in URL too, but that's messy. 
+                // Let's decode the name if passed, or just show Roll No.
+                const name = params.get('name') || "Student";
+
+                setStudent({ name, roll: rollNo });
+
+                calculateAttendance();
+            }, []);
+
+            const calculateAttendance = () => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth(); // 0-indexed
+
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                let workingDays = 0;
+                let presentDays = 0;
+
+                // Loop through each day of the month up to today
+                for (let d = 1; d <= today.getDate(); d++) {
+                    const currentDate = new Date(year, month, d);
+                    const dayOfWeek = currentDate.getDay(); // 0 = Sunday
+
+                    const dateString = currentDate.toISOString().split('T')[0];
+                    const isHoliday = holidays.includes(dateString);
+                    const isSunday = dayOfWeek === 0;
+
+                    if (!isSunday && !isHoliday) {
+                        workingDays++;
+
+                        // Check local storage for today's specific attendance
+                        if (d === today.getDate()) {
+                            const savedAttendance = localStorage.getItem('ece_c_attendance_' + currentDate.toDateString());
+                            if (savedAttendance) {
+                                const students = JSON.parse(savedAttendance);
+                                const params = new URLSearchParams(window.location.search);
+                                const roll = params.get('roll');
+                                const myRecord = students.find(s => s.roll === roll);
+                                if (myRecord && myRecord.isPresent) {
+                                    presentDays++;
+                                }
+                            } else {
+                                // Assume present if not marked yet (optimistic) or handle as absent
+                                // For demo, let's assume present for today if not marked absent explicitly
+                                presentDays++;
+                            }
+                        } else {
+                            // Mock historical data: Randomly present/absent for past days to simulate partial attendance
+                            // biased towards present (90% chance)
+                            if (Math.random() > 0.1) {
+                                presentDays++;
+                            }
+                        }
+                    }
+                }
+
+                // If it's early in the month, ensure we don't divide by zero
+                const percentage = workingDays > 0 ? Math.round((presentDays / workingDays) * 100) : 100;
+
+                setAttendanceData({
+                    totalWorkingDays: workingDays,
+                    presentDays,
+                    percentage
+                });
+            };
+
+            if (!student) return <div style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
+
+            return (
+                <div className="container">
+                    <div className="circuit-bg" />
+
+                    <header>
+                        <div className="logo">ECE-C Student Portal</div>
+                        <div className="student-profile">
+                            <div className="avatar">{student.roll ? student.roll.slice(-2) : 'ST'}</div>
+                            <div>
+                                <div className="welcome-text">Welcome back,</div>
+                                <div className="student-name-display">{student.name} ({student.roll})</div>
+                            </div>
+                        </div>
+                        <a href="index.html" className="logout-btn">Logout</a>
+                    </header>
+
+                    <motion.div
+                        className="dashboard-grid"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        {/* Attendance Card */}
+                        <div className="card">
+                            <div className="card-header">
+                                <h3 className="card-title">Attendance Overview</h3>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>February 2026</span>
+                            </div>
+
+                            <div
+                                className="attendance-circle"
+                                style={{ '--percentage': `${attendanceData.percentage}%` }}
+                            >
+                                <div className="attendance-value">{attendanceData.percentage}%</div>
+                            </div>
+
+                            <div className="attendance-stats">
+                                <div className="stat-box">
+                                    <div className="stat-value" style={{ color: 'var(--neon-green)' }}>{attendanceData.presentDays}</div>
+                                    <div className="stat-label">Days Present</div>
+                                </div>
+                                <div className="stat-box">
+                                    <div className="stat-value" style={{ color: 'var(--neon-blue)' }}>{attendanceData.totalWorkingDays}</div>
+                                    <div className="stat-label">Working Days</div>
+                                </div>
+                            </div>
+
+                            <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                                * Excludes Sundays and Public Holidays
+                            </p>
+                        </div>
+
+                        {/* Assignments Card */}
+                        <div className="card">
+                            <div className="card-header">
+                                <h3 className="card-title">Assignments & Submissions</h3>
+                            </div>
+
+                            <ul className="assignment-list">
+                                {assignments.map((assignment, index) => (
+                                    <li key={index} className="assignment-item">
+                                        <div>
+                                            <div className="subject-name">{assignment.subject}</div>
+                                            <div className="assignment-name">{assignment.title}</div>
+                                        </div>
+                                        <div className={`status-badge ${assignment.status === 'Submitted' ? 'status-submitted' :
+                                            assignment.status === 'Pending' ? 'status-pending' : 'status-graded'
+                                            }`}>
+                                            {assignment.status === 'Graded' ? assignment.score : assignment.status}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
